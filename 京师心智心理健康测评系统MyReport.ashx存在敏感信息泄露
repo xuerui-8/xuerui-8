@@ -63,6 +63,5 @@ def main():
     else :
         print(f"usage:Python{sys.argv[0]} -h")
 
-#设置程序的入口
 if __name__ == "__main__":
     main()
