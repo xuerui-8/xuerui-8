@@ -1,16 +1,46 @@
-## Hi there 👋
+项目介绍
+本项目是针对京师心智心理健康测评系统中存在的MyReport.ashx 敏感信息泄露漏洞编写的检测 POC（Proof of Concept）。这是我独立编写的第一个安全检测脚本，旨在帮助安全从业者快速验证目标系统是否存在该漏洞，同时也希望通过开源交流，获得各位师傅的指导与建议。
 
-<!--
-**xuerui-8/xuerui-8** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+漏洞说明
+京师心智心理健康测评系统的 MyReport.ashx 接口在处理用户请求时，未对参数进行严格校验和权限控制，攻击者可通过构造特定请求，直接获取系统中存储的用户心理健康测评报告等敏感信息，包括但不限于用户个人信息、测评结果等，对用户隐私造成严重威胁。
 
-Here are some ideas to get you started:
+POC 功能
+发送特定构造的 HTTP 请求到目标系统的 MyReport.ashx 接口
+检测响应中是否包含敏感信息特征（如测评报告关键词、用户信息等）
+输出检测结果（存在漏洞 / 不存在漏洞 / 检测失败）
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+使用方法
+环境要求
+Python 3.x
+依赖库：requests（可通过 pip install requests 安装）
+运行步骤
+克隆本仓库到本地：
+
+git clone https://github.com/你的用户名/你的仓库名.git
+cd 你的仓库名
+
+执行 POC 脚本，指定目标 URL（需包含协议，如 http:// 或 https://）：
+bash
+python poc.py -u http://target-ip:port
+
+或批量检测多个目标（将目标 URL 按行写入 targets.txt）：
+bash
+python poc.py -f targets.txt
+
+检测原理
+向目标 URL 拼接 MyReport.ashx 路径，构造完整请求地址
+发送包含特定参数的 GET/POST 请求（根据漏洞实际触发方式调整）
+
+检查响应状态码及响应内容：
+若响应包含敏感信息关键词（如 “测评报告”“姓名” 等），则判定为存在漏洞
+若响应正常但无敏感信息，判定为不存在漏洞
+若请求超时或出现其他错误，判定为检测失败
+
+免责声明
+本 POC 仅用于安全研究和合法授权的渗透测试，禁止用于未经授权的非法攻击行为
+使用本工具造成的任何直接或间接损失，由使用者自行承担
+请在使用前确保已获得目标系统的合法授权
+
+致谢与交流
+作为安全领域的初学者，编写过程中参考了许多前辈的开源项目和技术文章，在此表示感谢。
+由于水平有限，脚本可能存在逻辑不完善、兼容性问题等缺陷，恳请各位师傅批评指正。欢迎通过 Issues 或邮件（你的邮箱地址）与我交流，期待您的宝贵意见！
