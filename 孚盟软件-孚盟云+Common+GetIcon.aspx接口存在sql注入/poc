@@ -25,7 +25,7 @@ def poc(target):
         pass
 def main():
 
-    parser=argparse.ArgumentParser(description="微商城系统 goods SQL注入漏洞")
+    parser=argparse.ArgumentParser(description="孚盟软件-孚盟云存在SQL注入漏洞")
 
     parser.add_argument('-u','--url',dest='url',type=str,help='place input lik')
     parser.add_argument('-f','--file',dest='file',type=str,help='place input your le path')
